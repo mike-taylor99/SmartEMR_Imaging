@@ -1,0 +1,6 @@
+flask
+matplotlib
+numpy
+torch
+torchvision
+git+https://github.com/Project-MONAI/MONAI#egg=MONAI
