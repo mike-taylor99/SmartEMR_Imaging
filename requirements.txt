@@ -11,7 +11,7 @@ itsdangerous==1.1.0
 Jinja2==2.11.3
 MarkupSafe==1.1.1
 monai @ git+https://github.com/Project-MONAI/MONAI@2eada01efd9ddbcf8d9befe78b6ed67ce0cb454f
-numpy==1.20.1
+numpy
 Pillow==8.1.2
 pycparser==2.20
 pyOpenSSL==20.0.1
