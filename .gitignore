@@ -1,4 +1,8 @@
+.env
 .vscode/
+env
+MONAI_DATA_DIRECTORY/MedNIST
+MONAI_DATA_DIRECTORY/MedNIST.tar.gz
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

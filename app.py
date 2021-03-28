@@ -59,8 +59,8 @@ def classify():
     model = densenet121(spatial_dims=2, in_channels=1, out_channels=num_class).to(device)
 
     # Make prediction
-    # model.load_state_dict(torch.load("./models/best_metric_model.pth"))
-    model.load_state_dict(torch.load("./models/best_metric_model_cpu.pth"))
+    # model.load_state_dict(torch.load("./MONAI_DATA_DIRECTORY/best_metric_model.pth"))
+    model.load_state_dict(torch.load("./MONAI_DATA_DIRECTORY/best_metric_model_cpu.pth"))
     model.eval()
     y_true = list()
     y_pred = list()
