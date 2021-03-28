@@ -19,10 +19,12 @@ from makeModel import MedNISTDataset
 from PIL import Image
 
 import utils.html_strings as hts
+from utils.idb_queries import IDB_Connections
 
 app = Flask(__name__)
 app.config['MONGO_URI'] = os.environ['MONGO_URI']
 mongo = PyMongo(app)
+query = IDB_Connections(mongo)
 
 @app.route('/')
 def home():
@@ -36,19 +38,18 @@ def create():
         return 'Missing input values!'
 
     if 'image' in request.files:
-        user = mongo.db.users.find_one({'pid' : request.form.get('pid')})
+        user = query.get_user(request.form.get('pid'))
         image = request.files['image']
-        mongo.save_file(image.filename, image)
+        query.save_image(image.filename, image)
 
         tags = [x.strip() for x in request.form.get('tags').split(',')]
-        mongo.db.tags.insert( {'image_name': image.filename, 'tags': tags, 'date': request.form.get('date')} )
+        query.add_img_tags(image.filename, tags, request.form.get('date'))
         
         if user:
-            user['image_names'].append(image.filename)
-            user = mongo.db.users.save(user)
+            query.add_image_to_user(user, image.filename)
 
         else:
-            mongo.db.users.insert({'pid' : request.form.get('pid'), 'image_names': [image.filename]})
+            query.create_user_record(request.form.get('pid'), image.filename)
 
         return 'Done!'
     
@@ -59,28 +60,24 @@ def create():
 @app.route('/file/<filename>')
 @cross_origin()
 def file(filename):
-    return mongo.send_file(filename)
+    return query.get_image(filename)
 
 # POST method for NL query
 @app.route('/processquery', methods=['POST'])
 @cross_origin()
 def processquery():
     req_data = request.get_json()
-    query = ''
+    nl_query = ''
 
     if req_data:
-        query = req_data['query']
+        nl_query = req_data['query']
     else:
-        query = request.form.get('query')
+        nl_query = request.form.get('query')
     
-    PIDs = set([user['pid'] for user in mongo.db.users.find({})])
-    tags = set()
-    for image in mongo.db.tags.find({}):
-        for tag in image['tags']:
-            tags.add(tag)
+    PIDs, tags = query.get_pids(), query.get_tags()
     
     table = str.maketrans('', '', string.punctuation)
-    stripped = [w.translate(table) for w in query.split()]
+    stripped = [w.translate(table) for w in nl_query.split()]
 
     query_PIDs = []
     query_tags = []
@@ -96,9 +93,9 @@ def processquery():
     tag_images = []
 
     for user in query_PIDs:
-        user_images += mongo.db.users.find_one( {'pid' : user} )['image_names']
+        user_images += query.get_user(user)['image_names']
     if query_tags:
-        tag_images = [image['image_name'] for image in mongo.db.tags.find({'tags': {'$all': query_tags}})]
+        tag_images = [record['image_name'] for record in query.images_by_tags(query_tags)]
 
     if user_images and tag_images:
         images = list(set(user_images).intersection(set(tag_images)))
@@ -112,7 +109,7 @@ def processquery():
     return jsonify(images)
     
 
-# POST method for Angular
+# POST method for regular querying on UI
 @app.route('/findimages', methods=['POST'])
 @cross_origin()
 def findimages():
@@ -121,11 +118,11 @@ def findimages():
 
     if req_data:
         if req_data['pid']:
-            user = mongo.db.users.find_one( {'pid' : req_data['pid']} )
+            user = query.get_user(req_data['pid'])
         text = req_data['tags']
     else:
         if request.form.get('pid'):
-            user = mongo.db.users.find_one( {'pid' : request.form.get('pid')} )
+            user = query.get_user(request.form.get('pid'))
         text = request.form.get('tags')
     
     tags = [x.strip() for x in text.split(',')]
@@ -136,18 +133,17 @@ def findimages():
     if user:
         user_images = user['image_names']
     if text:
-        tag_images = mongo.db.tags.find({'tags': {'$all': tags}})
+        tag_images = [record['image_name'] for record in query.images_by_tags(tags)]
     
     images = []
     if user and text:
         for image in tag_images:
-            if image['image_name'] in user_images:
-                images.append(image['image_name'])
+            if image in user_images:
+                images.append(image)
     elif user:
         images = user_images
     elif text:
-        for image in tag_images:
-            images.append(image['image_name'])
+        images = tag_images
 
     return jsonify(images)
 
