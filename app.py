@@ -18,68 +18,15 @@ import makeModel
 from makeModel import MedNISTDataset
 from PIL import Image
 
+import utils.html_strings as hts
+
 app = Flask(__name__)
 app.config['MONGO_URI'] = os.environ['MONGO_URI']
 mongo = PyMongo(app)
 
 @app.route('/')
 def home():
-  return '''
-    <div>Upload Patient Images and Tags: <br>
-    <form method="POST" action="/create" enctype="multipart/form-data">
-        <label>Patiient ID:</label>
-        <input typr="text" name="pid">
-        <label>Tags:</label>
-        <input typr="text" name="tags">
-        <label>Date:</label>
-        <input typr="text" name="date">
-        <input type="file" name="image">
-        <input type="submit">
-    </form>
-    </div>
-    
-    <div>Find Patient Images: <br>
-    <form method="POST" action="/findprofile" enctype="multipart/form-data">
-        <label>Patient ID:</label>
-        <input typr="text" name="pid">
-        <input type="submit">
-    </form>
-    </div>
-
-    <div>Find Images by Tag(s): <br>
-    <form method="POST" action="/findtags" enctype="multipart/form-data">
-        <label>Tags:</label>
-        <input typr="text" name="tags">
-        <input type="submit">
-    </form>
-    </div>
-
-    <div>Web Service Connection Test: <br>
-    <form method="POST" action="/findimages" enctype="multipart/form-data">
-        <label>Patient ID:</label>
-        <input typr="text" name="pid">
-        <label>Tags:</label>
-        <input typr="text" name="tags">
-        <input type="submit">
-    </form>
-    </div>
-
-    <div>NL Query Test: <br>
-    <form method="POST" action="/processquery" enctype="multipart/form-data">
-        <label>Query:</label>
-        <input typr="text" name="query">
-        <input type="submit">
-    </form>
-    </div>
-
-    <div> Upload Image (Classification): <br>
-    <form method="POST" action="/classify" enctype="multipart/form-data">
-        <label>Image:</label>
-        <input type="file" name="image">
-        <input type="submit">
-    </form>
-    </div>
-  '''
+  return hts.upload_images() + hts.find_patient_img() + hts.find_tagged_img() + hts.ui_test() + hts.nl_test() + hts.classifier_test()
 
 # add profile and image data from index page form
 @app.route('/create', methods=['POST'])
