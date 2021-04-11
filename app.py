@@ -1,13 +1,15 @@
 from flask import Flask, request, url_for, redirect, jsonify
 from flask_cors import cross_origin
 from flask_pymongo import PyMongo
+from dotenv import load_dotenv
 from utils.idb_queries import IDB_Connections
 import utils.html_strings as hts
 import utils.monai_classifier as clf
 import os
 
 app = Flask(__name__)
-app.config['MONGO_URI'] = os.environ['MONGO_URI']
+load_dotenv()
+app.config['MONGO_URI'] = os.getenv('MONGO_URI')
 mongo = PyMongo(app)
 query = IDB_Connections(mongo)
 
