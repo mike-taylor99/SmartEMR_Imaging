@@ -92,16 +92,18 @@ def profile(pid):
 @app.route('/findprofile', methods=['POST'])
 def findprofile():
     user = mongo.db.users.find_one_or_404( {'pid' : request.form.get('pid')} )
-    res = f'''
-        <h1>Patient ID: {user['pid']}</h1>
-    '''
-    
+    patient = {'pid': user['pid']}
+    data = []
     for image in user['image_names']:
         tags_coll = mongo.db.tags.find_one_or_404( {'image_name' : image} )
-        res += f'''Tags: { tags_coll['tags'] } Date: { tags_coll['date'] }<br>'''
-        res += f''' <img src="{url_for('file', filename=image )}"> <br>'''
+        entry = {
+            'date': tags_coll['date'], 
+            'tags': tags_coll['tags'],
+            'image_src': url_for('file', filename=image )
+        }
+        data.append(entry)
 
-    return res
+    return render_template('patientImages.html', patient=patient, data=data)
 
 # POST method to find images by tags from index page form
 @app.route('/findtags', methods=['POST'])
