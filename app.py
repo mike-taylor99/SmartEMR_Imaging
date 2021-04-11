@@ -1,9 +1,8 @@
-from flask import Flask, request, url_for, redirect, jsonify
+from flask import Flask, request, url_for, redirect, jsonify, render_template
 from flask_cors import cross_origin
 from flask_pymongo import PyMongo
 from dotenv import load_dotenv
 from utils.idb_queries import IDB_Connections
-import utils.html_strings as hts
 import utils.monai_classifier as clf
 import os
 
@@ -15,7 +14,7 @@ query = IDB_Connections(mongo)
 
 @app.route('/')
 def home():
-  return hts.upload_images() + hts.find_patient_img() + hts.find_tagged_img() + hts.ui_test() + hts.nl_test() + hts.classifier_test()
+  return render_template('home.html')
 
 # add profile and image data from index page form
 @app.route('/create', methods=['POST'])
