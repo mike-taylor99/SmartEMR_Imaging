@@ -106,3 +106,6 @@ class IDB_Connections:
             return tag_images
         else:
             return []
+
+    def create_admin_acct(obj):
+        self.mongo.db.accounts.insert(obj)
