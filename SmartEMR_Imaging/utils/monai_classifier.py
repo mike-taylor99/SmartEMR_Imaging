@@ -9,7 +9,7 @@ from monai.transforms import (
     ToTensor,
 )
 
-from utils.makeModel import MedNISTDataset
+from SmartEMR_Imaging.utils.makeModel import MedNISTDataset
 from PIL import Image
 
 # define labels and tags array(s)
