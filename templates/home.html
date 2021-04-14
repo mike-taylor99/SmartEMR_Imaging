@@ -1,86 +1,126 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UConn CSE SDP Team 2: Medical Imaging Web-Service</title>
-</head>
-<body>
-    <h1>UConn Computer Science & Engineering Senior Design Project: Team 2</h1>
-    <h2>Medical Imaging Web-Service</h2>
+{% extends "layout.html" %}
+{% block content %}
+    <h1>Home Page</h1>
+    <!--
+    <h1>SmartEMR: Medical Imaging Web-Service</h1>
 
-    <h3>Upload Patient Images</h3>
-    <p>Upload Patient Images to new or existing patient profiles.</p>
-    <form method="POST" action="/create" enctype="multipart/form-data">
-        <label>Patiient ID:</label>
-        <input typr="text" name="pid">
-        <label>Tags:</label>
-        <input typr="text" name="tags">
-        <label>Date:</label>
-        <input typr="text" name="date">
-        <input type="file" name="image">
-        <input type="submit">
-    </form>
+    <div class="card">
+        <h5 class="card-header">Medical Image Upload</h5>
+        <div class="card-body">
+            <h5 class="card-title">Upload Medical Images to new or existing patient profiles.</h5>
+            <p class="card-text">
+                Will either append image to existing patient record, or create a new patient record.
+                Image will be stored with relevant information, tags, and descriptors.
+            </p>
+            <form method="POST" action="/create" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label>Patiient ID:</label>
+                    <input typr="text" name="pid">
+                </div>
 
-    <h3>Find Patient Images</h3>
-    <p>
-        Input a Patient ID (PID) and have all corresponding images & information
-        returned. Will return a 404 message if no records are found.
-    </p>
-    <form method="POST" action="/findprofile" enctype="multipart/form-data">
-        <label>Patient ID:</label>
-        <input typr="text" name="pid">
-        <input type="submit">
-    </form>
+                <div class="form-group">
+                    <label>Tags:</label>
+                    <input typr="text" name="tags">
+                </div>
 
-    <h3>Find Images by Tags and Descriptors</h3>
-    <p>
-        Input tags and descriptors in a comma-separated format (e.g., xrays, cavity,
-        teeth) and have all images with those tags and descriptors returned.
-    </p>
-    <div>Find Images by Tag(s): <br>
-    <form method="POST" action="/findtags" enctype="multipart/form-data">
-        <label>Tags:</label>
-        <input typr="text" name="tags">
-        <input type="submit">
-    </form>
+                <div class="form-group">
+                    <label>Date:</label>
+                    <input typr="text" name="date">
+                </div>
 
-    <h3>Patient ID and Tags/Descriptors Querying</h3>
-    <p>
-        Input fields take in Patient ID (PID) or tags/descriptors (not exclusive).
-        Endpoint will accept inputs with both, one, or none of the fields filled and
-        return relevant images. This endpoint will return an array of the image file
-        names to be used by the front-end interface for display purposes.
-    </p>
-    <form method="POST" action="/findimages" enctype="multipart/form-data">
-        <label>Patient ID:</label>
-        <input typr="text" name="pid">
-        <label>Tags:</label>
-        <input typr="text" name="tags">
-        <input type="submit">
-    </form>
+                <div class="form-group">
+                    <input type="file" name="image">
+                </div>
 
-    <h3>Natural Language Querying</h3>
-    <p>
-        Takes a natural language query as input and returns all relevant images
-        which may be related to the query
-    </p>
-    <form method="POST" action="/processquery" enctype="multipart/form-data">
-        <label>Query:</label>
-        <input typr="text" name="query">
-        <input type="submit">
-    </form>
+                <div class="form-group"></div>
+                    <input type="submit">
+                </div>
+            </form>
+        </div>
+    </div>
 
-    <h3>Medical Image Classification</h3>
-    <p>
-        Accepts a medical image for input and returns an array of all descriptors
-        which the deep-learning model percieves the image to be.
-    </p>
-    <form method="POST" action="/classify" enctype="multipart/form-data">
-        <label>Image:</label>
-        <input type="file" name="image">
-        <input type="submit">
-    </form>
-</body>
-</html>
+    <div class="card">
+        <h5 class="card-header">Patient Medical Imaging Lookup</h5>
+        <div class="card-body">
+            <h5 class="card-title">Find medical images on a patient record.</h5>
+            <p class="card-text">
+                Input a Patient ID (PID) and have all corresponding images & information
+                returned. Will return a 404 message if no records are found.
+            </p>
+            <form method="POST" action="/findprofile" enctype="multipart/form-data">
+                <label>Patient ID:</label>
+                <input typr="text" name="pid">
+                <input type="submit">
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <h5 class="card-header">Medical Imaging Descriptors Lookup</h5>
+        <div class="card-body">
+            <h5 class="card-title">Find medical images with specified tags and descriptors.</h5>
+            <p class="card-text">
+                Input tags and descriptors in a comma-separated format (e.g., xrays, cavity,
+                teeth) and have all images with those tags and descriptors returned.
+            </p>
+            <form method="POST" action="/findtags" enctype="multipart/form-data">
+                <label>Tags:</label>
+                <input typr="text" name="tags">
+                <input type="submit">
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <h5 class="card-header">Regular Querying</h5>
+        <div class="card-body">
+            <h5 class="card-title">Find medical images by Patient ID or specified tags and descriptors.</h5>
+            <p class="card-text">
+                Input fields take in Patient ID (PID) or tags/descriptors (not exclusive).
+                Endpoint will accept inputs with both, one, or none of the fields filled and
+                return relevant images. This endpoint will return an array of the image file
+                names to be used by the SmartEMR front-end interface for display purposes.
+            </p>
+            <form method="POST" action="/findimages" enctype="multipart/form-data">
+                <label>Patient ID:</label>
+                <input typr="text" name="pid">
+                <label>Tags:</label>
+                <input typr="text" name="tags">
+                <input type="submit">
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <h5 class="card-header">Natural Language Querying</h5>
+        <div class="card-body">
+            <h5 class="card-title">Find medical images using a natural language query.</h5>
+            <p class="card-text">
+                Takes a natural language query as input and returns all relevant images
+                which may be related to the query.
+            </p>
+            <form method="POST" action="/processquery" enctype="multipart/form-data">
+                <label>Query:</label>
+                <input typr="text" name="query">
+                <input type="submit">
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <h5 class="card-header">Medical Imaging Classification</h5>
+        <div class="card-body">
+            <h5 class="card-title">Classify and get relevant medical image descriptors.</h5>
+            <p class="card-text">
+                Accepts a medical image for input and returns an array of all descriptors
+                which the deep-learning model percieves the image to be.
+            </p>
+            <form method="POST" action="/classify" enctype="multipart/form-data">
+                <label>Image:</label>
+                <input type="file" name="image">
+                <input type="submit">
+            </form>
+        </div>
+    </div>
+    -->
+{% endblock content %}

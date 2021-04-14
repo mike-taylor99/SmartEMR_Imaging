@@ -1,0 +1,10 @@
+{% extends "layout.html" %}
+{% block content %}
+<body>
+    {% for entry in data %}
+        <h3>Date of Medical Image: {{ entry.date }}</h3>
+        <p>Tags and Descriptors: {{ entry.tags }}</p>
+        <img src="{{ entry.image_src }}" style="height:200px"
+    {% endfor %}
+</body>
+{% endblock content %}

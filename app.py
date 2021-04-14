@@ -1,4 +1,5 @@
-from flask import Flask, request, url_for, redirect, jsonify, render_template
+from flask import Flask, request, url_for, redirect, jsonify, render_template, flash
+from forms import RegistrationForm, LoginForm
 from flask_cors import cross_origin
 from flask_pymongo import PyMongo
 from dotenv import load_dotenv
@@ -8,6 +9,7 @@ import os
 
 app = Flask(__name__)
 load_dotenv()
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['MONGO_URI'] = os.getenv('MONGO_URI')
 mongo = PyMongo(app)
 query = IDB_Connections(mongo)
@@ -15,6 +17,29 @@ query = IDB_Connections(mongo)
 @app.route('/')
 def home():
   return render_template('home.html')
+
+@app.route("/query")
+def about():
+    return render_template('query.html', title='Query')
+
+@app.route("/register", methods=['GET', 'POST'])
+def register():
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        flash(f'Account created for {form.username.data}!', 'success')
+        return redirect(url_for('home'))
+    return render_template('register.html', title='Register', form=form)
+
+@app.route("/login", methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        if form.email.data == 'admin@smartemr.com' and form.password.data == 'password':
+            flash('You have been logged in!', 'success')
+            return redirect(url_for('home'))
+        else:
+            flash('Login Unsuccessful. Please check username and password', 'danger')
+    return render_template('login.html', title='Login', form=form)
 
 # add profile and image data from index page form
 @app.route('/create', methods=['POST'])
@@ -92,7 +117,7 @@ def profile(pid):
 @app.route('/findprofile', methods=['POST'])
 def findprofile():
     user = mongo.db.users.find_one_or_404( {'pid' : request.form.get('pid')} )
-    patient = {'pid': user['pid']}
+    patient = user['pid']
     data = []
     for image in user['image_names']:
         tags_coll = mongo.db.tags.find_one_or_404( {'image_name' : image} )
@@ -123,3 +148,6 @@ def findtags():
 def classify():
     image = request.files['image']
     return jsonify(clf.classify_image(image))
+
+if __name__ == '__main__':
+    app.run(debug=True)
