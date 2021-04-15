@@ -1,8 +1,8 @@
 from flask import request, url_for, redirect, jsonify, render_template, flash, request
 from flask_cors import cross_origin
 from flask_login import login_user, current_user, logout_user, login_required
-from SmartEMR_Imaging import app, bcrypt, mongo, query
-from SmartEMR_Imaging.forms import RegistrationForm, LoginForm
+from SmartEMR_Imaging import app, bcrypt, mongo, query, db
+from SmartEMR_Imaging.forms import RegistrationForm, LoginForm, UpdateAccountForm
 from SmartEMR_Imaging.model import User
 import SmartEMR_Imaging.utils.monai_classifier as clf
 
@@ -46,10 +46,19 @@ def logout():
     logout_user()
     return redirect(url_for('home'))
 
-@app.route("/account")
+@app.route("/account", methods=['GET', 'POST'])
 @login_required
 def account():
-    return render_template('account.html', title='Account')
+    form = UpdateAccountForm()
+    if form.validate_on_submit():
+        current_user.email = form.email.data
+        current_user.save()
+        flash('Your account has been updated!', 'success')
+        return redirect(url_for('account'))
+    elif request.method == 'GET':
+        form.email.data = current_user.email
+    name = 'Admin' if current_user.verified else 'Non-Admin'
+    return render_template('account.html', title='Account', name=name, form=form)
 
 # add profile and image data from index page form
 @app.route('/create', methods=['POST'])

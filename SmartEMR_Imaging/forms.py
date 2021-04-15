@@ -1,6 +1,8 @@
 from flask_wtf import FlaskForm
+from flask_login import current_user
 from wtforms import StringField, PasswordField, SubmitField, BooleanField
-from wtforms.validators import DataRequired, Length, Email, EqualTo
+from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
+from SmartEMR_Imaging.model import User
 
 
 class RegistrationForm(FlaskForm):
@@ -13,6 +15,11 @@ class RegistrationForm(FlaskForm):
                                      validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Sign Up')
 
+    def validate_email(self, email):
+        user = User.objects(email=email.data).first()
+        if user:
+            raise ValidationError('The email is already registered with an account!')
+
 
 class LoginForm(FlaskForm):
     email = StringField('Email',
@@ -20,3 +27,14 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     remember = BooleanField('Remember Me')
     submit = SubmitField('Login')
+
+class UpdateAccountForm(FlaskForm):
+    email = StringField('Email',
+                        validators=[DataRequired(), Email()])
+    submit = SubmitField('Update')
+
+    def validate_email(self, email):
+        if email.data != current_user.email:
+            user = User.objects(email=email.data).first()
+            if user:
+                raise ValidationError('The email is already registered with an account!')
