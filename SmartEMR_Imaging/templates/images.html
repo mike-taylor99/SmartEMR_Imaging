@@ -1,10 +1,16 @@
 {% extends "layout.html" %}
 {% block content %}
-<body>
     {% for entry in data %}
-        <h3>Date of Medical Image: {{ entry.date }}</h3>
-        <p>Tags and Descriptors: {{ entry.tags }}</p>
-        <img src="{{ entry.image_src }}" style="height:200px"
+        <div class="content-section">
+            <h3>{{ entry.date }}</h3>
+            <p>{{ entry.tags }}</p>
+            <img src="{{ entry.image_src }}" style="height:200px">
+        </div>
     {% endfor %}
-</body>
+
+    {% for image in images %}
+        <div class="content-section">
+            <img src="{{ request.url_root + 'file/' + image }}" style="height:200px">
+        </div>
+    {% endfor %}
 {% endblock content %}

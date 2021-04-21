@@ -2,17 +2,36 @@ from flask import request, url_for, redirect, jsonify, render_template, flash, r
 from flask_cors import cross_origin
 from flask_login import login_user, current_user, logout_user, login_required
 from SmartEMR_Imaging import app, bcrypt, mongo, query, db
-from SmartEMR_Imaging.forms import RegistrationForm, LoginForm, UpdateAccountForm
+from SmartEMR_Imaging.forms import RegistrationForm, LoginForm, UpdateAccountForm, UploadMedicalImage, PatientImages, RegularImgQuery, NLImgQuery, Classify
 from SmartEMR_Imaging.model import User
 import SmartEMR_Imaging.utils.monai_classifier as clf
+import requests
 
 @app.route('/')
 def home():
   return render_template('home.html')
 
-@app.route("/query")
+@app.route("/query", methods=['GET', 'POST'])
+@login_required
 def about():
-    return render_template('query.html', title='Query')
+    uploadform = UploadMedicalImage()
+    patientform = PatientImages()
+    queryform = RegularImgQuery()
+    nlform = NLImgQuery()
+    classifyform = Classify()
+    if uploadform.submit1.data and uploadform.validate_on_submit():
+        return redirect(url_for('create'), code=307)
+    if patientform.submit2.data and patientform.validate_on_submit():
+        return redirect(url_for('findprofile'), code=307)
+    if queryform.submit3.data and queryform.validate_on_submit():
+        images = requests.post(request.url_root + url_for('findimages')[1:], data=request.form)
+        return render_template('images.html', images=images.json())
+    if nlform.submit4.data and nlform.validate_on_submit():
+        images = requests.post(request.url_root + url_for('processquery')[1:], data=request.form)
+        return render_template('images.html', images=images.json())
+    if classifyform.submit5.data and classifyform.validate_on_submit():
+        return redirect(url_for('classify'), code=307)
+    return render_template('query.html', title='Query', uploadform=uploadform, patientform=patientform, queryform=queryform, nlform=nlform, classifyform=classifyform)
 
 @app.route("/register", methods=['GET', 'POST'])
 def register():
@@ -75,7 +94,8 @@ def create():
         
         query.add_image_record(pid, image, tags, date)
 
-        return 'Done!'
+        flash(f'Medical Image successfully uploaded!', 'success')
+        return redirect(url_for('about'))
     
     else:
         return 'Did not upload image!'
@@ -117,21 +137,6 @@ def findimages():
 
     return jsonify(query.regq(pid, tags))
 
-# GET method to find profile
-@app.route('/profile/<pid>')
-def profile(pid):
-    user = mongo.db.users.find_one_or_404( {'pid' : pid} )
-    res = f'''
-        <h1>Patient ID: {user['pid']}</h1>
-    '''
-    
-    for image in user['image_names']:
-        tags_coll = mongo.db.tags.find_one_or_404( {'image_name' : image} )
-        res += f'''Tags: { tags_coll['tags'] } Date: { tags_coll['date'] }<br>'''
-        res += f''' <img src="{url_for('file', filename=image )}"> <br>'''
-
-    return res
-
 # POST method to find profile from index page form
 @app.route('/findprofile', methods=['POST'])
 def findprofile():
@@ -147,20 +152,7 @@ def findprofile():
         }
         data.append(entry)
 
-    return render_template('patientImages.html', patient=patient, data=data)
-
-# POST method to find images by tags from index page form
-@app.route('/findtags', methods=['POST'])
-def findtags():
-    tags = [x.strip() for x in request.form.get('tags').split(',')]
-    res = f'''
-        <h1>Tags: {tags}</h1>
-    '''
-
-    for image in mongo.db.tags.find({'tags': {'$all': tags}}):
-        res += f''' <img src="{url_for('file', filename=image['image_name'] )}"> '''
-    
-    return res
+    return render_template('images.html', title=f'{patient} Images', data=data)
 
 @app.route('/classify', methods=['POST'])
 @cross_origin()
