@@ -10,7 +10,7 @@
 
     {% for image in images %}
         <div class="content-section">
-            <img src="{{ request.url_root + 'file/' + image }}" style="height:200px">
+            <img src="{{ image }}" style="height:200px">
         </div>
     {% endfor %}
 {% endblock content %}

@@ -1,11 +1,10 @@
-from flask import request, url_for, redirect, jsonify, render_template, flash, request
+from flask import request, url_for, redirect, jsonify, render_template, flash, request, json
 from flask_cors import cross_origin
 from flask_login import login_user, current_user, logout_user, login_required
 from SmartEMR_Imaging import app, bcrypt, mongo, query, db
 from SmartEMR_Imaging.forms import RegistrationForm, LoginForm, UpdateAccountForm, UploadMedicalImage, PatientImages, RegularImgQuery, NLImgQuery, Classify
 from SmartEMR_Imaging.model import User
 import SmartEMR_Imaging.utils.monai_classifier as clf
-import requests
 
 @app.route('/')
 def home():
@@ -24,11 +23,13 @@ def about():
     if patientform.submit2.data and patientform.validate_on_submit():
         return redirect(url_for('findprofile'), code=307)
     if queryform.submit3.data and queryform.validate_on_submit():
-        images = requests.post(request.url_root + url_for('findimages')[1:], data=request.form)
-        return render_template('images.html', images=images.json())
+        data = findimages()
+        images = [url_for('file', filename=image) for image in json.loads(data.get_data().decode("utf-8"))]
+        return render_template('images.html', images=images)
     if nlform.submit4.data and nlform.validate_on_submit():
-        images = requests.post(request.url_root + url_for('processquery')[1:], data=request.form)
-        return render_template('images.html', images=images.json())
+        data = processquery()
+        images = [url_for('file', filename=image) for image in json.loads(data.get_data().decode("utf-8"))]
+        return render_template('images.html', images=images)
     if classifyform.submit5.data and classifyform.validate_on_submit():
         return redirect(url_for('classify'), code=307)
     return render_template('query.html', title='Query', uploadform=uploadform, patientform=patientform, queryform=queryform, nlform=nlform, classifyform=classifyform)
