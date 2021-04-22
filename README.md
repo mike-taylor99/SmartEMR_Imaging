@@ -5,36 +5,22 @@ A web-service built using Python for storing, updating, classifying and returnin
 
 ## Features
 - Uploading of medical imaging data to new or existing profiles
-    - Inputs:
-        - Patient ID
-        - Tags and descriptors of image (separated by commas)
-        - Date and time of medical image
-        - Medical image file
-    - Returns:
-        - Success message (uploads data to database)
+    - Inputs: Patient ID, Tags and descriptors of image (separated by commas), Date and time of medical image, Medical image file
+    - Returns: Success message (uploads data to database)
 - Querying of Patient Profile(s)
-    - Input
-        - Patient ID
-    - Returns:
-         - All images with their associated descriptors, time, and date information
+    - Input: Patient ID
+    - Returns: All images with their associated descriptors, time, and date information
 - Querying by Patient ID or Tags
-    - Input (can leave either field null):
-        - Patient ID
-        - Tags
-    - Returns:
-        - Images which satisfy specified input criteria
+    - Input (can leave either field null): Patient ID, Tags
+    - Returns: Images which satisfy specified input criteria
 - Querying by Natural Language
-    - Input:
-        - Natural Language Query
-    - Returns:
-        - Images satifying parameters specified in Natural Language Query
+    - Input: Natural Language Query
+    - Returns: Images satifying parameters specified in Natural Language Query
 - Medical Image Classification
-    - Input:
-        - Medical Image
-    - Returns:
-        - Array of all image tags and descriptors as classified using PyTorch and the MONAI framework
+    - Input: Medical Image
+    - Returns: Array of all image tags and descriptors as classified using PyTorch and the MONAI framework
 
-## Running Application
+## Running SmartEMR Imaging
 ### Creating a virtual environment
 On macOS and Linux:
 ```
